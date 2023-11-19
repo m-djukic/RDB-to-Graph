@@ -1,0 +1,22 @@
+-> Query 1
+
+match (p: Product{Category:"Produce"})<--(s:Supplier)
+return distinct s.Company as ProduceSuppliers
+
+-> Query 2
+
+match(o:Order)-[]->(od:OrderDetail)<-[]-(p:Product) 
+where p.ProductName="Northwind Traders Coffee" 
+return p.ProductName, sum(od.Quantity)
+
+-> Query 2 - reference [5]
+
+match(o:Order)-[:oOD]-(od:OrderDetail)-[:pOD]-(p:Product) 
+where p.`Product Name`="Northwind Traders Coffee" 
+return p.`Product Name`, sum(od.Quantity)
+
+-> Query 3
+
+match (emp: Employee) 
+where emp.JobTitle='Sales Representative'
+return emp.LastName, emp.FirstName, emp.Salary

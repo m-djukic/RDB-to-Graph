@@ -1,0 +1,55 @@
+1) node Order and node Customer
+
+load csv with headers from 'file:///Orders.csv' as row fieldterminator ';' create (o:Order) set o+=row
+load csv with headers from 'file:///Customers.csv' as row fieldterminator ';' create (c:Customer) set c+=row
+
+match (o: Order), (c: Customer) where o.`Customer ID`=c.ID create (c)-[:CO]->(o)
+
+
+2) node Invoice and node Shipper
+
+load csv with headers from 'file:///Invoices.csv' as row fieldterminator ';' create (i:Invoice) set i+=row
+load csv with headers from 'file:///Shippers.csv' as row fieldterminator ';' create (ship:Shipper) set ship+=row
+
+match (o: Order), (i: Invoice) where o.OrderID=i.OrderID create (o)-[:OI]->(i)
+match (o: Order), (ship: Shipper) where o.`Shipper ID`=ship.ID create (s)-[:OSHIP]->(o)
+
+
+3) node OrderStatus and node OrderDetail
+
+load csv with headers from 'file:///OrdersStatus.csv' as row fieldterminator ';' create (os:OrderStatus) set os+=row
+load csv with headers from 'file:///OrderDetails.csv' as row fieldterminator ';' create (od:OrderDetail) set od+=row
+
+match (o: Order), (os: OrderStatus) where o.StatusID=os.StatusID create (os)-[:OOS]->(o)
+match (o: Order), (od: OrderDetail) where o.OrderID=od.OrderID create (o)-[:OOD]->(od)
+
+4) node Product, node PurchaseOrder and node Supplier
+
+load csv with headers from 'file:///Suppliers.csv' as row fieldterminator ';' create (sup:Supplier) set sup+=row
+load csv with headers from 'file:///Products.csv' as row fieldterminator ';' create (p:Product) set p+=row
+load csv with headers from 'file:///PurchaseOrders.csv' as row fieldterminator ';' create (po:PurchaseOrder) set po+=row
+load csv with headers from 'file:///PurchaseOrderDetails.csv' as row fieldterminator ';' create (pod:PurchaseOrderDetail) set pod+=row
+
+match (od: OrderDetail), (p: Product) where p.ID=od.ProductID create (p)-[:ODP]->(od)
+match (p: Product), (pod: PurchaseOrderDetail) where p.ID=pod.ProductID create (p)-[:PPOD]->(pod)
+match (pod: PurchaseOrderDetail), (po: PurchaseOrder) where pod.PurchaseOrderID=po.PurchaseOrderID create (po)-[:PODPO]->(pod)
+match (po: PurchaseOrder), (sup: Supplier) where sup.ID=po.SupplierID create (po)-[:POSUP]->(sup)
+
+5) node Employee and node EmployeePrivilege
+
+load csv with headers from 'file:///Employees.csv' as row fieldterminator ';' create (emp:Employee) set emp+=row
+load csv with headers from 'file:///Privileges.csv' as row fieldterminator ';' create (priv:Privilege) set priv+=row
+load csv with headers from 'file:///EmployeePrivileges.csv' as row fieldterminator ';' create (ep:EmployeePrivilege) set ep+=row
+
+match (po: PurchaseOrder), (emp: Employee) where emp.ID=po.CreatedBy create (emp)-[:POEMP]->(po)
+match (o: Order), (emp: Employee) where emp.ID=o.`Employee ID` create (emp)-[:OEMP]->(o)
+match (emp: Employee), (ep: EmployeePrivilege) where emp.ID=ep.`Employee ID` create (emp)-[:EMPEP]->(ep)
+match (ep: EmployeePrivilege), (priv: Privilege) where ep.PrivilegeID=priv.PrivilegeID create (priv)-[:EPPRIV]->(ep)
+
+match (emp:Employee), (ep:EmployeePrivilege), (priv:Privilege) where emp.ID=ep.`Employee ID` and ep.PrivilegeID=priv.PrivilegeID create (emp) -[:EmpEP]-> (ep) <-[:PrivEP]- (priv)
+match (o:Order), (od:OrderDetail), (p:Product) where o.OrderID=od.OrderID and od.ProductID=p.ID create (o) -[:oOD]-> (od) <-[:pOD]- (p)
+
+
+
+
+
